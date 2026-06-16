@@ -20,6 +20,8 @@ events:
     names:
       - "uname"
     candidate_directories:
+      - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
       - "/opt/homebrew/opt/qt@5/bin/"
       - "/opt/homebrew/opt/qt/bin/"
       - "/opt/homebrew/bin/"
@@ -35,6 +37,8 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
     searched_directories:
+      - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/uname"
+      - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/uname"
       - "/opt/homebrew/opt/qt@5/bin/uname"
       - "/opt/homebrew/opt/qt/bin/uname"
       - "/opt/homebrew/bin/uname"
@@ -45,6 +49,8 @@ events:
     found: "/usr/bin/uname"
     search_context:
       ENV{PATH}:
+        - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
         - "/opt/homebrew/opt/qt@5/bin"
         - "/opt/homebrew/opt/qt/bin"
         - "/opt/homebrew/bin"
@@ -59,6 +65,10 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/homebrew/opt/qt@5/bin"
+        - "/opt/homebrew/opt/qt/bin"
   -
     kind: "message-v1"
     backtrace:
@@ -86,6 +96,8 @@ events:
     names:
       - "install_name_tool"
     candidate_directories:
+      - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/"
+      - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/"
       - "/opt/homebrew/opt/qt@5/bin/"
       - "/opt/homebrew/opt/qt/bin/"
       - "/opt/homebrew/bin/"
@@ -101,6 +113,8 @@ events:
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin/"
       - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin/"
     searched_directories:
+      - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand/install_name_tool"
+      - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli/install_name_tool"
       - "/opt/homebrew/opt/qt@5/bin/install_name_tool"
       - "/opt/homebrew/opt/qt/bin/install_name_tool"
       - "/opt/homebrew/bin/install_name_tool"
@@ -111,6 +125,8 @@ events:
     found: "/usr/bin/install_name_tool"
     search_context:
       ENV{PATH}:
+        - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
         - "/opt/homebrew/opt/qt@5/bin"
         - "/opt/homebrew/opt/qt/bin"
         - "/opt/homebrew/bin"
@@ -125,5 +141,9 @@ events:
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin"
         - "/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin"
+        - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/debugCommand"
+        - "/Users/plotnikovmatvej/Library/Application Support/Code/User/globalStorage/github.copilot-chat/copilotCli"
+        - "/opt/homebrew/opt/qt@5/bin"
+        - "/opt/homebrew/opt/qt/bin"
       CMAKE_INSTALL_PREFIX: "/usr/local"
 ...

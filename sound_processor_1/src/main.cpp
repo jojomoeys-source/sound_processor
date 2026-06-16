@@ -3,7 +3,6 @@
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    static constexpr int kExitOk              = 0;
     static constexpr int kExitStdException    = 1;
     static constexpr int kExitUnknownException = 2;
 

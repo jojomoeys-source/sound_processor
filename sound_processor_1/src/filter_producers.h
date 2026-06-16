@@ -4,15 +4,15 @@
 #include "filter.h"
 #include "wav_io.h"
 
-#include "ampl_filter.h"
-#include "normalize_filter.h"
-#include "silence_filter.h"
-#include "timestretch_filter.h"
-#include "lowpass_filter.h"
-#include "generator_filters.h"
-#include "mute_filter.h"
-#include "gain_filter.h"
-#include "mix_filter.h"
+#include "filters/ampl_filter.h"
+#include "filters/normalize_filter.h"
+#include "filters/silence_filter.h"
+#include "filters/timestretch_filter.h"
+#include "filters/lowpass_filter.h"
+#include "filters/generator_filters.h"
+#include "filters/mute_filter.h"
+#include "filters/gain_filter.h"
+#include "filters/mix_filter.h"
 
 #include <stdexcept>
 #include <string>
