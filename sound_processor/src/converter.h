@@ -4,13 +4,14 @@
 #include "pipeline.h"
 #include "filter.h"
 
-#include <functional>
 #include <map>
 #include <string>
 #include <vector>
 
-// Тип продюсера: функция, принимающая дескриптор фильтра и возвращающая IFilter*
-using FilterProducer = std::function<IFilter*(const FilterDescriptor&)>;
+// Тип продюсера: указатель на функцию, принимающую дескриптор и возвращающую IFilter*.
+// Использование указателя на функцию (а не std::function) согласуется с требованиями ТЗ:
+// типоунифицированный, пригодный как значение ассоциативного массива.
+using FilterProducer = IFilter* (*)(const FilterDescriptor&);
 
 class CmdLineArgs2PipelineConverter {
 public:
@@ -19,7 +20,9 @@ public:
     // Регистрация продюсера для заданного имени фильтра
     void add_filter_producer(const std::string& filter_name, FilterProducer producer);
 
-    // Построение пайплайна из списка дескрипторов
+    // Построение пайплайна из списка дескрипторов.
+    // Вся логика поиска продюсера, проверки ненулевых указателей и создания фильтров
+    // изолирована внутри этого метода (требование ТЗ: no cross-cutting concern).
     Pipeline create_pipeline(const std::vector<FilterDescriptor>& descriptors) const;
 
 private:

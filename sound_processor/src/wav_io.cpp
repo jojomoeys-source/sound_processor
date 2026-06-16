@@ -53,14 +53,21 @@ Waveform WavReader::read(const std::string& file_path) {
         file.seekg(fmt.subchunk_size - 16, std::ios::cur);
     }
 
-    // 3. data chunk
+    // 3. Ищем data chunk, пропуская любые посторонние чанки (LIST, INFO и т.п.)
     DataHeader data{};
-    file.read(reinterpret_cast<char*>(&data), sizeof(data));
-    if (!file) {
-        throw std::runtime_error("Failed to read data header: " + file_path);
-    }
-    if (std::strncmp(data.subchunk_id, "data", 4) != 0) {
-        throw std::runtime_error("Missing data chunk: " + file_path);
+    while (true) {
+        file.read(reinterpret_cast<char*>(&data), sizeof(data));
+        if (!file) {
+            throw std::runtime_error("Failed to read data header: " + file_path);
+        }
+        if (std::strncmp(data.subchunk_id, "data", 4) == 0) {
+            break; // нашли нужный чанк
+        }
+        // Неизвестный чанк — пропускаем его тело
+        file.seekg(data.subchunk_size, std::ios::cur);
+        if (!file) {
+            throw std::runtime_error("Unexpected EOF while searching for data chunk: " + file_path);
+        }
     }
 
     // 4. Читаем выборки

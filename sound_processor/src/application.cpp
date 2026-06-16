@@ -7,9 +7,17 @@
 #include <iostream>
 
 void Application::configure() {
-    converter_.add_filter_producer("mute", filter_producers::make_mute);
-    converter_.add_filter_producer("gain", filter_producers::make_gain);
-    converter_.add_filter_producer("mix",  filter_producers::make_mix);
+    // Преобразующие фильтры
+    converter_.add_filter_producer("ampl",        filter_producers::make_ampl);
+    converter_.add_filter_producer("normalize",   filter_producers::make_normalize);
+    converter_.add_filter_producer("silence",     filter_producers::make_silence);
+    converter_.add_filter_producer("timestretch", filter_producers::make_timestretch);
+    converter_.add_filter_producer("lowpass",     filter_producers::make_lowpass);
+    converter_.add_filter_producer("mute",        filter_producers::make_mute);
+    converter_.add_filter_producer("gain",        filter_producers::make_gain);
+    converter_.add_filter_producer("mix",         filter_producers::make_mix);
+    // Генераторы (диспетчер разбирает sin/am/fm внутри)
+    converter_.add_filter_producer("generator",   filter_producers::make_generator);
 }
 
 int Application::start(int argc, char* argv[]) {
@@ -55,11 +63,21 @@ int Application::start(int argc, char* argv[]) {
 
 void Application::print_help() const {
     std::cout
-        << "Usage: sound_processor [-i <input.wav>] -o <output.wav>"
+        << "Usage: sound_processor [-i <input.wav>] [-o <output.wav>]"
            " [-f <filter> [args...]] ...\n"
         << "\n"
-        << "Filters:\n"
-        << "  mute <start_sec> <end_sec>   silence the given time range\n"
-        << "  gain <factor>                multiply every sample by factor\n"
-        << "  mix  <file.wav> <start_sec>  overlay another wav starting at start_sec\n";
+        << "Transforming filters:\n"
+        << "  ampl        <factor>                         multiply every sample by factor (factor >= 0)\n"
+        << "  normalize   [peak]                           scale so max sample = peak*32767 (default peak=1)\n"
+        << "  silence     <sec|ms> <start> <end>           insert silence in [start, end]\n"
+        << "  timestretch <factor>                         stretch/compress signal (factor > 0)\n"
+        << "  lowpass     <window_size>                    smooth with moving average (odd window)\n"
+        << "  mute        <start_sec> <end_sec>            zero out samples in [start, end]\n"
+        << "  gain        <factor>                         alias for ampl\n"
+        << "  mix         <file.wav> <start_sec>           overlay another wav at start_sec\n"
+        << "\n"
+        << "Generator filters (ignore input signal):\n"
+        << "  generator sin <freq_hz> <dur_ms>                               sine wave\n"
+        << "  generator am  <amp> <carrier_hz> <mod_hz> <depth> <dur_ms>    AM signal\n"
+        << "  generator fm  <amp> <carrier_hz> <mod_hz> <dev_hz> <dur_ms>   FM signal\n";
 }

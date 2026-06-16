@@ -4,11 +4,11 @@
 
 void CmdLineArgs2PipelineConverter::add_filter_producer(const std::string& filter_name,
                                                          FilterProducer producer) {
-    producers_[filter_name] = std::move(producer);
+    producers_[filter_name] = producer;
 }
 
 FilterProducer CmdLineArgs2PipelineConverter::find_producer(const std::string& filter_name) const {
-    auto it = producers_.find(filter_name);
+    const auto it = producers_.find(filter_name);
     if (it == producers_.end()) {
         return nullptr;
     }
@@ -21,6 +21,8 @@ Pipeline CmdLineArgs2PipelineConverter::create_pipeline(
     Pipeline pipeline;
 
     for (const auto& fd : descriptors) {
+        // Поиск продюсера, проверка null, создание фильтра — всё изолировано здесь
+        // (требование ТЗ: no cross-cutting concern)
         FilterProducer producer = find_producer(fd.name);
 
         if (!producer) {
