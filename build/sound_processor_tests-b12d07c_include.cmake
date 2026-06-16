@@ -1,0 +1,5 @@
+if(EXISTS "/Users/plotnikovmatvej/sound_processor/build/sound_processor_tests-b12d07c_tests.cmake")
+  include("/Users/plotnikovmatvej/sound_processor/build/sound_processor_tests-b12d07c_tests.cmake")
+else()
+  add_test(sound_processor_tests_NOT_BUILT-b12d07c sound_processor_tests_NOT_BUILT-b12d07c)
+endif()
