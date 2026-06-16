@@ -1,0 +1,2 @@
+/Users/plotnikovmatvej/Desktop/sound_processor/build/CMakeFiles/edit_cache.dir
+/Users/plotnikovmatvej/Desktop/sound_processor/build/CMakeFiles/rebuild_cache.dir

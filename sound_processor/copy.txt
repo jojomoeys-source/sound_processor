@@ -1,0 +1,727 @@
+я не знаю почему ты видишь так странно файлы, но они у меня выглядят так, если можешь изменить внутри источников инфу на эту было бы здорово #pragma once
+
+#include "waveform.h"
+
+
+
+class IFilter {
+
+public:
+
+    virtual ~IFilter() = default;
+
+    
+
+    virtual void apply(Waveform& waveform) = 0;
+
+}; #include "gain_filter.h"
+
+#include <stdexcept>
+
+#include <algorithm> // для std::clamp
+
+
+
+GainFilter::GainFilter(double value) : value_(value) {}
+
+
+
+void GainFilter::apply(Waveform& waveform) {
+
+    auto& samples = waveform.get_samples();
+
+    for (auto& sample : samples) {
+
+        // Умножаем 32-битное целое для предотвращения переполнения
+
+        int32_t processed = static_cast<int32_t>(sample * value_);
+
+        // Ограничиваем диапазон допустимыми значениями для 16-битного звука
+
+        sample = static_cast<int16_t>(std::clamp(processed, -32768, 32767));
+
+    }
+
+} #pragma once
+
+#include "filter.h"
+
+
+
+class GainFilter : public IFilter {
+
+public:
+
+    explicit GainFilter(double value);
+
+    ~GainFilter() override = default;
+
+    
+
+    void apply(Waveform& waveform) override;
+
+
+
+private:
+
+    double value_;
+
+}; #include "mix_filter.h"
+
+#include <stdexcept>
+
+#include <algorithm>
+
+
+
+MixFilter::MixFilter(const Waveform& additional_waveform, double start_seconds)
+
+    : additional_waveform_(additional_waveform), start_seconds_(start_seconds) {
+
+    if (start_seconds_ < 0) {
+
+        throw std::invalid_argument("Start time must be non-negative.");
+
+    }
+
+}
+
+
+
+void MixFilter::apply(Waveform& waveform) {
+
+    if (waveform.get_sample_rate() != additional_waveform_.get_sample_rate() ||
+
+        waveform.get_num_channels() != additional_waveform_.get_num_channels() ||
+
+        waveform.get_bits_per_sample() != additional_waveform_.get_bits_per_sample()) {
+
+        throw std::invalid_argument("Waveforms must have the same sample rate, number of channels, and bits per sample.");
+
+    }
+
+
+
+    size_t start_idx = waveform.seconds_to_samples(start_seconds_);
+
+    auto& main_samples = waveform.get_samples();
+
+    const auto& add_samples = additional_waveform_.get_samples();
+
+
+
+    for (size_t i = 0; i < add_samples.size(); ++i) {
+
+        size_t main_i = start_idx + i;
+
+        if (main_i >= main_samples.size()) {
+
+            break; 
+
+        }
+
+        
+
+        // Складываем и усредняем значения во избежание переполнения 
+
+        int32_t mixed = static_cast<int32_t>(main_samples[main_i]) + static_cast<int32_t>(add_samples[i]);
+
+        main_samples[main_i] = static_cast<int16_t>(std::clamp(mixed / 2, -32768, 32767));
+
+    }
+
+} #pragma once
+
+#include "filter.h"
+
+
+
+class MixFilter : public IFilter {
+
+public:
+
+    MixFilter(const Waveform& additional_waveform, double start_seconds);
+
+    ~MixFilter() override = default;
+
+    
+
+    void apply(Waveform& waveform) override;
+
+
+
+private:
+
+    Waveform additional_waveform_;
+
+    double start_seconds_;
+
+}; #include "mute_filter.h"
+
+#include <stdexcept>
+
+#include <algorithm>
+
+
+
+MuteFilter::MuteFilter(double start_time_seconds, double end_time_seconds)
+
+    : start_time_seconds_(start_time_seconds), end_time_seconds_(end_time_seconds) {
+
+    if (start_time_seconds_ < 0 || end_time_seconds_ < 0) {
+
+        throw std::invalid_argument("Start and end times must be non-negative.");
+
+    }
+
+    if (start_time_seconds_ > end_time_seconds_) {
+
+        throw std::invalid_argument("Start time must be less than or equal to end time.");
+
+    }
+
+}
+
+
+
+void MuteFilter::apply(Waveform& waveform) {
+
+    size_t start_idx = waveform.seconds_to_samples(start_time_seconds_);
+
+    size_t end_idx = waveform.seconds_to_samples(end_time_seconds_);
+
+    auto& samples = waveform.get_samples();
+
+
+
+    start_idx = std::min(start_idx, samples.size());
+
+    end_idx = std::min(end_idx, samples.size());
+
+
+
+    for (size_t i = start_idx; i < end_idx; ++i) {
+
+        samples[i] = 0;
+
+    }
+
+} #pragma once
+
+#include "filter.h"
+
+
+
+class MuteFilter : public IFilter {
+
+public:
+
+    MuteFilter(double start_time_seconds, double end_time_seconds);
+
+    ~MuteFilter() override = default;
+
+    
+
+    void apply(Waveform& waveform) override;
+
+
+
+private:
+
+    double start_time_seconds_;
+
+    double end_time_seconds_;
+
+}; #include "pipeline.h"
+
+
+
+void Pipeline::add_filter(IFilter *filter) {
+
+    filters_.push_back(filter);
+
+}
+
+
+
+void Pipeline::apply(Waveform &waveform) {
+
+    for (IFilter *filter : filters_) {
+
+        filter->apply(waveform);
+
+    }
+
+}
+
+
+
+Pipeline::~Pipeline() {
+
+    for (IFilter *filter : filters_) {
+
+        delete filter;
+
+    }
+
+    
+
+    filters_.clear();
+
+} #pragma once
+
+#include "filter.h"
+
+#include "waveform.h"
+
+#include <vector>
+
+
+
+class Pipeline {
+
+public:
+
+  Pipeline() = default;
+
+
+
+  ~Pipeline();
+
+
+
+  void add_filter(IFilter *filter);
+
+
+
+  void apply(Waveform &waveform);
+
+
+
+private:
+
+  std::vector<IFilter *> filters_;
+
+}; #include <cstdint>
+
+
+
+#pragma pack(push, 1)
+
+
+
+struct RiffHeader {
+
+  char chunk_id[4];
+
+  uint32_t chunk_size;
+
+  char format[4];
+
+};
+
+
+
+struct FmtHeader {
+
+  char subchunk_id[4];
+
+  uint32_t subchunk_size;
+
+  uint16_t audio_format;
+
+  uint16_t num_channels;
+
+  uint32_t sample_rate;
+
+  uint32_t byte_rate;
+
+  uint16_t block_align;
+
+  uint16_t bits_per_sample;
+
+};
+
+
+
+struct DataHeader {
+
+  char subchunk_id[4];
+
+  uint32_t subchunk_size;
+
+};
+
+
+
+#pragma pack(pop) #include "wav_io.h"
+
+#include "wav_headers.h"
+
+#include <fstream>
+
+#include <stdexcept>
+
+#include <cstring>
+
+#include <vector>
+
+
+
+Waveform WavReader::read(const std::string &file_path) {
+
+    std::ifstream file(file_path, std::ios::binary);
+
+    if (!file.is_open()) {
+
+        throw std::runtime_error("WavReader: Could not open file: " + file_path);
+
+    }
+
+
+
+    RiffHeader riff_header;
+
+    FmtHeader fmt_header;
+
+    DataHeader data_header;
+
+
+
+    // Считываем упакованные заголовки
+
+    file.read(reinterpret_cast<char*>(&riff_header), sizeof(RiffHeader));
+
+    file.read(reinterpret_cast<char*>(&fmt_header), sizeof(FmtHeader));
+
+    file.read(reinterpret_cast<char*>(&data_header), sizeof(DataHeader));
+
+
+
+    // Вычисляем количество семплов на основе размера чанка data
+
+    size_t sample_count = data_header.subchunk_size / (fmt_header.bits_per_sample / 8) / fmt_header.num_channels;
+
+
+
+    // Конструируем объект звука
+
+    Waveform waveform(sample_count, fmt_header.sample_rate, fmt_header.num_channels, fmt_header.bits_per_sample);
+
+
+
+    // Считываем сырые данные выборок прямо в вектор в памяти
+
+    file.read(reinterpret_cast<char*>(waveform.get_samples().data()), data_header.subchunk_size);
+
+
+
+    return waveform; 
+
+}
+
+
+
+void WavWriter::write(const std::string& file_path, const Waveform& waveform) {
+
+    std::ofstream file(file_path, std::ios::binary);
+
+    if (!file.is_open()) {
+
+        throw std::runtime_error("WavWriter: Could not open file for writing: " + file_path);
+
+    }
+
+
+
+    size_t data_size = waveform.get_samples().size() * sizeof(int16_t);
+
+
+
+    RiffHeader riff_header;
+
+    std::memcpy(riff_header.chunk_id, "RIFF", 4);
+
+    riff_header.chunk_size = static_cast<uint32_t>(36 + data_size);
+
+    std::memcpy(riff_header.format, "WAVE", 4);
+
+
+
+    FmtHeader fmt_header;
+
+    std::memcpy(fmt_header.subchunk_id, "fmt ", 4);
+
+    fmt_header.subchunk_size = 16;
+
+    fmt_header.audio_format = 1; // PCM
+
+    fmt_header.num_channels = waveform.get_num_channels();
+
+    fmt_header.sample_rate = waveform.get_sample_rate();
+
+    fmt_header.bits_per_sample = waveform.get_bits_per_sample();
+
+    fmt_header.byte_rate = fmt_header.sample_rate * fmt_header.num_channels * (fmt_header.bits_per_sample / 8);
+
+    fmt_header.block_align = fmt_header.num_channels * (fmt_header.bits_per_sample / 8);
+
+
+
+    DataHeader data_header;
+
+    std::memcpy(data_header.subchunk_id, "data", 4);
+
+    data_header.subchunk_size = static_cast<uint32_t>(data_size);
+
+
+
+    // Записываем заголовки
+
+    file.write(reinterpret_cast<const char*>(&riff_header), sizeof(RiffHeader));
+
+    file.write(reinterpret_cast<const char*>(&fmt_header), sizeof(FmtHeader));
+
+    file.write(reinterpret_cast<const char*>(&data_header), sizeof(DataHeader));
+
+
+
+    // Записываем массив отсчетов
+
+    file.write(reinterpret_cast<const char*>(waveform.get_samples().data()), data_size);
+
+} #pragma once
+
+
+
+#include "waveform.h"
+
+#include <string>
+
+
+
+class WavReader {
+
+public:
+
+  static Waveform read(const std::string &file_path);
+
+};
+
+
+
+class WavWriter {
+
+public:
+
+  static void write(const std::string &file_path, const Waveform &waveform);
+
+}; #include "waveform.h"
+
+#include <cmath>
+
+#include <stdexcept>
+
+
+
+Waveform::Waveform(size_t sample_count) : samples_(sample_count) {}
+
+
+
+Waveform::Waveform(size_t sample_count, uint32_t sample_rate,
+
+                   uint16_t num_channels, uint16_t bits_per_sample)
+
+    : sample_rate_(sample_rate), num_channels_(num_channels),
+
+      bits_per_sample_(bits_per_sample), samples_(sample_count) {}
+
+
+
+int16_t Waveform::get_sample_at(size_t index) const {
+
+  return samples_.at(index);
+
+}
+
+
+
+void Waveform::set_sample_at(size_t index, int16_t value) {
+
+  samples_.at(index) = value;
+
+}
+
+
+
+double Waveform::get_duration_seconds() const {
+
+  if (sample_rate_ == 0) {
+
+    throw std::runtime_error("Sample rate cannot be zero.");
+
+  }
+
+  return static_cast<double>(samples_.size()) /
+
+         static_cast<double>(sample_rate_);
+
+}
+
+
+
+size_t Waveform::seconds_to_samples(double seconds) const {
+
+  if (seconds < 0.0) {
+
+    throw std::invalid_argument("Seconds cannot be negative.");
+
+  }
+
+  return static_cast<size_t>(std::round(seconds * sample_rate_));
+
+}
+
+
+
+double Waveform::samples_index_to_seconds(size_t sample_index) const {
+
+  if (sample_rate_ == 0) {
+
+    throw std::runtime_error("Sample rate cannot be zero.");
+
+  }
+
+  return static_cast<double>(sample_index) / static_cast<double>(sample_rate_);
+
+}
+
+
+
+void Waveform::resize(size_t new_sample_count) {
+
+  samples_.resize(new_sample_count);
+
+}
+
+
+
+void Waveform::clear() {
+
+  samples_.clear();
+
+
+
+  sample_rate_ = 44100;
+
+  num_channels_ = 1;
+
+  bits_per_sample_ = 16;
+
+} #pragma once
+
+
+
+#include <cstddef>
+
+#include <cstdint>
+
+#include <vector>
+
+
+
+class Waveform {
+
+public:
+
+  Waveform() = default;
+
+
+
+  explicit Waveform(size_t sample_count);
+
+
+
+  Waveform(size_t sample_count, uint32_t sample_rate, uint16_t num_channels,
+
+           uint16_t bits_per_sample);
+
+
+
+  ~Waveform() = default;
+
+
+
+  uint32_t get_sample_rate() const { return sample_rate_; }
+
+  uint16_t get_num_channels() const { return num_channels_; }
+
+  uint16_t get_bits_per_sample() const { return bits_per_sample_; }
+
+
+
+  void set_meta_info(uint32_t sample_rate, uint16_t num_channels,
+
+                     uint16_t bits_per_sample) {
+
+    sample_rate_ = sample_rate;
+
+    num_channels_ = num_channels;
+
+    bits_per_sample_ = bits_per_sample;
+
+  }
+
+
+
+  size_t get_sample_count() const { return samples_.size(); }
+
+
+
+  const std::vector<int16_t> &get_samples() const { return samples_; }
+
+
+
+  std::vector<int16_t> &get_samples() { return samples_; }
+
+
+
+  int16_t get_sample_at(size_t index) const;
+
+  void set_sample_at(size_t index, int16_t value);
+
+
+
+  double get_duration_seconds() const;
+
+
+
+  size_t seconds_to_samples(double seconds) const;
+
+
+
+  double samples_index_to_seconds(size_t sample_index) const;
+
+
+
+  void resize(size_t new_sample_count);
+
+
+
+  void clear();
+
+
+
+private:
+
+  uint32_t sample_rate_ = 44100;
+
+  uint16_t num_channels_ = 1;
+
+  uint16_t bits_per_sample_ = 16;
+
+
+
+  std::vector<int16_t> samples_;
+
+};

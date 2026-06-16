@@ -1,0 +1,13 @@
+explicit
+
+#pragma pack(push, 1)
+
+file_path, std::ios::binary
+
+virtual
+
+и очень много из wave_io_cpp
+
+explicit
+
+override
