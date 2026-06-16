@@ -1,13 +1,17 @@
 #pragma once
  
-#include "filter.h"
-#include "waveform.h"
- 
-// Заглушает (зануляет) выборки в диапазоне [start_sec, end_sec).
+#include "filter/filter.h"
+#include <cmath>
+#include <stdexcept>
 class MuteFilter : public IFilter {
 public:
     MuteFilter(double start_sec, double end_sec)
-        : start_sec_(start_sec), end_sec_(end_sec) {}
+        : start_sec_(start_sec), end_sec_(end_sec) {
+        if (!std::isfinite(start_sec) || start_sec < 0.0)
+            throw std::invalid_argument("mute: start_sec must be finite and >= 0");
+        if (!std::isfinite(end_sec) || end_sec < start_sec)
+            throw std::invalid_argument("mute: end_sec must be finite and >= start_sec");
+    }
  
     ~MuteFilter() override = default;
  

@@ -1,13 +1,12 @@
 #pragma once
 
-#include "filter.h"
-#include "waveform.h"
+#include "filter/filter.h"
+#include "waveform/waveform.h"
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <limits>
-#include <numbers>   // std::numbers::pi (C++20); заменим ниже на constexpr для C++17
 #include <stdexcept>
 #include <vector>
 
@@ -32,8 +31,12 @@ inline int16_t clamp_sample(double v) {
 inline size_t ms_to_samples(double duration_ms) {
     if (duration_ms < 0.0)
         throw std::invalid_argument("generator: duration_ms must be >= 0");
-    return static_cast<size_t>(
-        std::round(duration_ms * kSampleRate / 1000.0));
+    const double sample_count = duration_ms * kSampleRate / 1000.0;
+    if (!std::isfinite(sample_count) ||
+        sample_count > static_cast<double>(std::numeric_limits<size_t>::max())) {
+        throw std::overflow_error("generator: duration_ms is too large");
+    }
+    return static_cast<size_t>(std::round(sample_count));
 }
 
 } // namespace generator_detail
@@ -73,8 +76,8 @@ public:
     SinGeneratorFilter(double frequency_hz, double duration_ms)
         : freq_(frequency_hz)
         , n_(generator_detail::ms_to_samples(duration_ms)) {
-        if (frequency_hz < 0.0)
-            throw std::invalid_argument("generator sin: frequency_hz must be >= 0");
+        if (!std::isfinite(frequency_hz) || frequency_hz < 0.0)
+            throw std::invalid_argument("generator sin: frequency_hz must be finite and >= 0");
     }
 
     ~SinGeneratorFilter() override = default;
@@ -111,14 +114,14 @@ public:
         : amplitude_(amplitude), carrier_hz_(carrier_hz)
         , modulation_hz_(modulation_hz), depth_(depth)
         , n_(generator_detail::ms_to_samples(duration_ms)) {
-        if (amplitude < 0.0 || amplitude > 1.0)
-            throw std::invalid_argument("generator am: amplitude must be in [0, 1]");
-        if (carrier_hz < 0.0)
-            throw std::invalid_argument("generator am: carrier_hz must be >= 0");
-        if (modulation_hz < 0.0)
-            throw std::invalid_argument("generator am: modulation_hz must be >= 0");
-        if (depth < 0.0 || depth > 1.0)
-            throw std::invalid_argument("generator am: depth must be in [0, 1]");
+        if (!std::isfinite(amplitude) || amplitude < 0.0 || amplitude > 1.0)
+            throw std::invalid_argument("generator am: amplitude must be finite and in [0, 1]");
+        if (!std::isfinite(carrier_hz) || carrier_hz < 0.0)
+            throw std::invalid_argument("generator am: carrier_hz must be finite and >= 0");
+        if (!std::isfinite(modulation_hz) || modulation_hz < 0.0)
+            throw std::invalid_argument("generator am: modulation_hz must be finite and >= 0");
+        if (!std::isfinite(depth) || depth < 0.0 || depth > 1.0)
+            throw std::invalid_argument("generator am: depth must be finite and in [0, 1]");
     }
 
     ~AmGeneratorFilter() override = default;
@@ -157,14 +160,14 @@ public:
         : amplitude_(amplitude), carrier_hz_(carrier_hz)
         , modulation_hz_(modulation_hz), deviation_hz_(deviation_hz)
         , n_(generator_detail::ms_to_samples(duration_ms)) {
-        if (amplitude < 0.0 || amplitude > 1.0)
-            throw std::invalid_argument("generator fm: amplitude must be in [0, 1]");
-        if (carrier_hz < 0.0)
-            throw std::invalid_argument("generator fm: carrier_hz must be >= 0");
-        if (modulation_hz <= 0.0)
-            throw std::invalid_argument("generator fm: modulation_hz must be > 0");
-        if (deviation_hz < 0.0)
-            throw std::invalid_argument("generator fm: deviation_hz must be >= 0");
+        if (!std::isfinite(amplitude) || amplitude < 0.0 || amplitude > 1.0)
+            throw std::invalid_argument("generator fm: amplitude must be finite and in [0, 1]");
+        if (!std::isfinite(carrier_hz) || carrier_hz < 0.0)
+            throw std::invalid_argument("generator fm: carrier_hz must be finite and >= 0");
+        if (!std::isfinite(modulation_hz) || modulation_hz <= 0.0)
+            throw std::invalid_argument("generator fm: modulation_hz must be finite and > 0");
+        if (!std::isfinite(deviation_hz) || deviation_hz < 0.0)
+            throw std::invalid_argument("generator fm: deviation_hz must be finite and >= 0");
     }
 
     ~FmGeneratorFilter() override = default;

@@ -1,7 +1,7 @@
 #pragma once
  
-#include "filter.h"
-#include "waveform.h"
+#include "filter/filter.h"
+#include "waveform/waveform.h"
  
 #include <algorithm>
 #include <cmath>
@@ -13,8 +13,8 @@
 class AmplFilter : public IFilter {
 public:
     explicit AmplFilter(double factor) : factor_(factor) {
-        if (factor < 0.0)
-            throw std::invalid_argument("ampl: factor must be >= 0");
+        if (!std::isfinite(factor) || factor < 0.0)
+            throw std::invalid_argument("ampl: factor must be finite and >= 0");
     }
  
     ~AmplFilter() override = default;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "filter.h"
-#include "waveform.h"
+#include "filter/filter.h"
+#include "waveform/waveform.h"
 
 #include <algorithm>
 #include <cmath>
@@ -15,7 +15,15 @@
 class MixFilter : public IFilter {
 public:
     MixFilter(Waveform additional, double start_sec)
-        : additional_(std::move(additional)), start_sec_(start_sec) {}
+        : additional_(std::move(additional)), start_sec_(start_sec) {
+        if (!std::isfinite(start_sec) || start_sec < 0.0)
+            throw std::invalid_argument("mix: start_sec must be finite and >= 0");
+        if (additional_.get_sample_rate() != 44100 ||
+            additional_.get_num_channels() != 1 ||
+            additional_.get_bits_per_sample() != 16) {
+            throw std::invalid_argument("mix: additional waveform must be 44100 Hz mono 16-bit");
+        }
+    }
 
     ~MixFilter() override = default;
 

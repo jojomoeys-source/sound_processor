@@ -1,7 +1,7 @@
 #pragma once
 
-#include "filter.h"
-#include "waveform.h"
+#include "filter/filter.h"
+#include "waveform/waveform.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -16,10 +16,10 @@ public:
 
     SilenceFilter(Unit unit, double start, double end)
         : unit_(unit), start_(start), end_(end) {
-        if (start < 0.0)
-            throw std::invalid_argument("silence: start must be >= 0");
-        if (end < start)
-            throw std::invalid_argument("silence: end must be >= start");
+        if (!std::isfinite(start) || start < 0.0)
+            throw std::invalid_argument("silence: start must be finite and >= 0");
+        if (!std::isfinite(end) || end < start)
+            throw std::invalid_argument("silence: end must be finite and >= start");
     }
 
     ~SilenceFilter() override = default;
@@ -38,9 +38,10 @@ public:
         const size_t start_idx = waveform.seconds_to_samples(start_sec);
         const size_t end_idx   = waveform.seconds_to_samples(end_sec);
 
-        // Число нулевых отсчётов для вставки
-        if (end_idx <= start_idx) return;
-        const size_t silence_count = end_idx - start_idx;
+        // Число нулевых отсчётов для вставки. В ТЗ конец диапазона указан включительно,
+        // поэтому добавляем один отсчёт.
+        if (end_idx < start_idx) return;
+        const size_t silence_count = end_idx - start_idx + 1;
 
         auto& samples = waveform.get_samples();
         const size_t old_size = samples.size();

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "filter.h"
-#include "waveform.h"
+#include "filter/filter.h"
+#include "waveform/waveform.h"
 
 #include <cmath>
 #include <cstdint>

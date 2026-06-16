@@ -1,7 +1,7 @@
 #pragma once
 
-#include "filter.h"
-#include "waveform.h"
+#include "filter/filter.h"
+#include "waveform/waveform.h"
 
 #include <algorithm>
 #include <cmath>
@@ -17,8 +17,8 @@ public:
     static constexpr double kDefaultPeak = 1.0;
 
     explicit NormalizeFilter(double peak = kDefaultPeak) : peak_(peak) {
-        if (peak < 0.0 || peak > 1.0)
-            throw std::invalid_argument("normalize: peak must be in [0, 1]");
+        if (!std::isfinite(peak) || peak < 0.0 || peak > 1.0)
+            throw std::invalid_argument("normalize: peak must be finite and in [0, 1]");
     }
 
     ~NormalizeFilter() override = default;
