@@ -1,0 +1,55 @@
+#include "filters/mix_filter.h"
+
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+#include <utility>
+
+MixFilter::MixFilter(Waveform additional, double start_sec)
+    : additional_(std::move(additional)), start_sec_(start_sec) {
+    if (!std::isfinite(start_sec) || start_sec < 0.0)
+        throw std::invalid_argument("mix: start_sec must be finite and >= 0");
+    if (additional_.get_sample_rate() != 44100 ||
+        additional_.get_num_channels() != 1 ||
+        additional_.get_bits_per_sample() != 16) {
+        throw std::invalid_argument("mix: additional waveform must be 44100 Hz mono 16-bit");
+    }
+}
+
+MixFilter::~MixFilter() = default;
+
+void MixFilter::apply(Waveform& waveform) {
+    if (additional_.get_sample_count() == 0) return;
+
+    constexpr double kMin = static_cast<double>(std::numeric_limits<int16_t>::min());
+    constexpr double kMax = static_cast<double>(std::numeric_limits<int16_t>::max());
+
+    if (waveform.get_sample_count() == 0) {
+        waveform.set_meta_info(additional_.get_sample_rate(),
+                               additional_.get_num_channels(),
+                               additional_.get_bits_per_sample());
+    }
+
+    const size_t offset = waveform.seconds_to_samples(start_sec_);
+    const size_t needed = offset + additional_.get_sample_count();
+
+    if (needed > waveform.get_sample_count()) {
+        waveform.resize(needed);
+    }
+
+    for (size_t i = 0; i < additional_.get_sample_count(); ++i) {
+        const double sum = static_cast<double>(waveform.get_sample_at(offset + i))
+                         + static_cast<double>(additional_.get_sample_at(i));
+        const double clamped = std::clamp(sum, kMin, kMax);
+        waveform.set_sample_at(offset + i, static_cast<int16_t>(std::round(clamped)));
+    }
+}
+
+double MixFilter::get_start_sec() const {
+    return start_sec_;
+}
+
+const Waveform& MixFilter::get_additional_waveform() const {
+    return additional_;
+}

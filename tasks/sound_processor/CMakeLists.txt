@@ -13,6 +13,17 @@ set(SOUND_PROCESSOR_SOURCES
     src/pipeline/pipeline.cpp
     src/waveform/waveform.cpp
     src/wav/wav_io.cpp
+    src/filters/ampl_filter.cpp
+    src/filters/normalize_filter.cpp
+    src/filters/silence_filter.cpp
+    src/filters/timestretch_filter.cpp
+    src/filters/lowpass_filter.cpp
+    src/filters/highpass_filter.cpp
+    src/filters/bandpass_filter.cpp
+    src/filters/reject_filter.cpp
+    src/filters/generator_filters.cpp
+    src/filters/mute_filter.cpp
+    src/filters/mix_filter.cpp
 )
 
 set(SOUND_PROCESSOR_HEADERS
