@@ -31,6 +31,7 @@ int run_application(const std::vector<std::string>& args) {
 
 } // namespace
 
+// Проверяет: Application: no args prints help and returns success
 TEST_CASE("Application: no args prints help and returns success", "[application]") {
     Application app;
     app.configure();
@@ -45,10 +46,12 @@ TEST_CASE("Application: no args prints help and returns success", "[application]
     CHECK(app.start(static_cast<int>(argv.size()), argv.data()) == 0);
 }
 
+// Проверяет: Application: bad arguments return error
 TEST_CASE("Application: bad arguments return error", "[application]") {
     CHECK(run_application({"sound_processor", "-f", "-i"}) == 1);
 }
 
+// Проверяет: Application: generator creates output without input
 TEST_CASE("Application: generator creates output without input", "[application]") {
     const std::filesystem::path output =
         std::filesystem::temp_directory_path() / "sound_processor_app_generator.wav";
@@ -66,6 +69,7 @@ TEST_CASE("Application: generator creates output without input", "[application]"
     remove_if_exists(output);
 }
 
+// Проверяет: Application: copy input to output when no filters are provided
 TEST_CASE("Application: copy input to output when no filters are provided", "[application]") {
     const std::filesystem::path input =
         std::filesystem::temp_directory_path() / "sound_processor_app_input.wav";

@@ -19,6 +19,7 @@ static std::vector<char*> make_argv(std::vector<std::string>& args) {
     return argv;
 }
 
+// Проверяет: CmdLineArgs2PipelineConverter: creates pipeline from descriptors
 TEST_CASE("CmdLineArgs2PipelineConverter: creates pipeline from descriptors", "[converter]") {
     CmdLineArgs2PipelineConverter converter;
     converter.add_filter_producer("ampl", [](const FilterDescriptor& fd) -> IFilter* {
@@ -38,6 +39,7 @@ TEST_CASE("CmdLineArgs2PipelineConverter: creates pipeline from descriptors", "[
     CHECK(waveform.get_sample_at(1) == -40);
 }
 
+// Проверяет: CmdLineArgs2PipelineConverter: unknown filter throws
 TEST_CASE("CmdLineArgs2PipelineConverter: unknown filter throws", "[converter]") {
     CmdLineArgs2PipelineConverter converter;
     CHECK_THROWS_AS(
@@ -45,6 +47,7 @@ TEST_CASE("CmdLineArgs2PipelineConverter: unknown filter throws", "[converter]")
         std::runtime_error);
 }
 
+// Проверяет: CmdLineArgs2PipelineConverter: null producer is rejected
 TEST_CASE("CmdLineArgs2PipelineConverter: null producer is rejected", "[converter]") {
     CmdLineArgs2PipelineConverter converter;
     CHECK_THROWS_AS(
@@ -52,6 +55,7 @@ TEST_CASE("CmdLineArgs2PipelineConverter: null producer is rejected", "[converte
         std::invalid_argument);
 }
 
+// Проверяет: Application: generator ignores invalid input file
 TEST_CASE("Application: generator ignores invalid input file", "[application]") {
     namespace fs = std::filesystem;
 

@@ -100,6 +100,7 @@ void write_basic_wav(const std::filesystem::path& path,
 
 } // namespace
 
+// Проверяет: WavWriter: writes valid PCM mono 44100 Hz 16-bit WAV
 TEST_CASE("WavWriter: writes valid PCM mono 44100 Hz 16-bit WAV", "[wav_io]") {
     remove_if_exists(kValidWavPath);
 
@@ -118,6 +119,7 @@ TEST_CASE("WavWriter: writes valid PCM mono 44100 Hz 16-bit WAV", "[wav_io]") {
     remove_if_exists(kValidWavPath);
 }
 
+// Проверяет: WavWriter: writes valid empty WAV
 TEST_CASE("WavWriter: writes valid empty WAV", "[wav_io]") {
     remove_if_exists(kValidWavPath);
 
@@ -130,6 +132,7 @@ TEST_CASE("WavWriter: writes valid empty WAV", "[wav_io]") {
     remove_if_exists(kValidWavPath);
 }
 
+// Проверяет: WavWriter: rejects non-44100 Hz waveform
 TEST_CASE("WavWriter: rejects non-44100 Hz waveform", "[wav_io]") {
     remove_if_exists(kValidWavPath);
 
@@ -139,6 +142,7 @@ TEST_CASE("WavWriter: rejects non-44100 Hz waveform", "[wav_io]") {
     remove_if_exists(kValidWavPath);
 }
 
+// Проверяет: WavReader: rejects non-44100 Hz WAV
 TEST_CASE("WavReader: rejects non-44100 Hz WAV", "[wav_io]") {
     remove_if_exists(kInvalidRatePath);
     write_invalid_sample_rate_wav(kInvalidRatePath);
@@ -148,6 +152,7 @@ TEST_CASE("WavReader: rejects non-44100 Hz WAV", "[wav_io]") {
     remove_if_exists(kInvalidRatePath);
 }
 
+// Проверяет: WavReader: rejects invalid RIFF chunk size
 TEST_CASE("WavReader: rejects invalid RIFF chunk size", "[wav_io]") {
     const std::filesystem::path path =
         std::filesystem::temp_directory_path() / "sound_processor_bad_riff_size.wav";
@@ -159,6 +164,7 @@ TEST_CASE("WavReader: rejects invalid RIFF chunk size", "[wav_io]") {
     remove_if_exists(path);
 }
 
+// Проверяет: WavReader: rejects invalid byte_rate
 TEST_CASE("WavReader: rejects invalid byte_rate", "[wav_io]") {
     const std::filesystem::path path =
         std::filesystem::temp_directory_path() / "sound_processor_bad_byte_rate.wav";
@@ -170,6 +176,7 @@ TEST_CASE("WavReader: rejects invalid byte_rate", "[wav_io]") {
     remove_if_exists(path);
 }
 
+// Проверяет: WavReader: rejects invalid block_align
 TEST_CASE("WavReader: rejects invalid block_align", "[wav_io]") {
     const std::filesystem::path path =
         std::filesystem::temp_directory_path() / "sound_processor_bad_block_align.wav";
@@ -181,6 +188,7 @@ TEST_CASE("WavReader: rejects invalid block_align", "[wav_io]") {
     remove_if_exists(path);
 }
 
+// Проверяет: WavReader: rejects truncated data chunk without allocating declared samples
 TEST_CASE("WavReader: rejects truncated data chunk without allocating declared samples", "[wav_io]") {
     const std::filesystem::path path =
         std::filesystem::temp_directory_path() / "sound_processor_truncated_data.wav";
