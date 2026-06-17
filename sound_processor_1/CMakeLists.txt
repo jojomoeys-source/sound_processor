@@ -76,6 +76,7 @@ if(BUILD_TESTING)
         tests/sound_processor_tests/test_args_parser.cpp
         tests/sound_processor_tests/test_waveform.cpp
         tests/sound_processor_tests/test_filters.cpp
+        tests/sound_processor_tests/test_main.cpp
         tests/sound_processor_tests/test_pipeline.cpp
         tests/sound_processor_tests/test_wav_io.cpp
     )
