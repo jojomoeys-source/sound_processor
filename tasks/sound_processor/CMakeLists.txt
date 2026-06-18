@@ -10,6 +10,7 @@ set(SOUND_PROCESSOR_SOURCES
     src/app/application.cpp
     src/args/args_parser.cpp
     src/converter/converter.cpp
+    src/filter_producers/filter_producers.cpp
     src/pipeline/pipeline.cpp
     src/waveform/waveform.cpp
     src/wav/wav_io.cpp

@@ -19,7 +19,7 @@ void Application::configure() {
     converter_.add_filter_producer("notch",       filter_producers::make_reject);
     converter_.add_filter_producer("mute",        filter_producers::make_mute);
     converter_.add_filter_producer("mix",         filter_producers::make_mix);
-    // Генераторы (диспетчер разбирает sin/am/fm внутри)
+    // Генераторы (разбирает sin/am/fm)
     converter_.add_filter_producer("generator",   filter_producers::make_generator);
 }
 
