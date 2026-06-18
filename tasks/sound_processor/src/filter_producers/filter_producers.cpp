@@ -182,4 +182,4 @@ IFilter* make_generator(const FilterDescriptor& fd) {
         "'. Expected: sin, am, fm");
 }
 
-} // namespace filter_producers
+} 

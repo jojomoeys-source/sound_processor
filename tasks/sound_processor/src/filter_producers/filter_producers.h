@@ -14,7 +14,7 @@ int parse_int(const std::string& s, const char* filter, const char* param);
 void require_params(const FilterDescriptor& fd, size_t n);
 void require_params_range(const FilterDescriptor& fd, size_t min_n, size_t max_n);
 
-} // namespace detail
+} 
 
 IFilter* make_ampl(const FilterDescriptor& fd);
 IFilter* make_normalize(const FilterDescriptor& fd);
@@ -32,4 +32,4 @@ IFilter* make_generator_am(const FilterDescriptor& fd, size_t offset);
 IFilter* make_generator_fm(const FilterDescriptor& fd, size_t offset);
 IFilter* make_generator(const FilterDescriptor& fd);
 
-} // namespace filter_producers
+} 
