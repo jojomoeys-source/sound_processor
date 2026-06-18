@@ -7,7 +7,6 @@
 #include <iostream>
 
 void Application::configure() {
-    // Преобразующие фильтры
     converter_.add_filter_producer("ampl",        filter_producers::make_ampl);
     converter_.add_filter_producer("normalize",   filter_producers::make_normalize);
     converter_.add_filter_producer("silence",     filter_producers::make_silence);
@@ -19,12 +18,10 @@ void Application::configure() {
     converter_.add_filter_producer("notch",       filter_producers::make_reject);
     converter_.add_filter_producer("mute",        filter_producers::make_mute);
     converter_.add_filter_producer("mix",         filter_producers::make_mix);
-    // Генераторы (разбирает sin/am/fm)
     converter_.add_filter_producer("generator",   filter_producers::make_generator);
 }
 
 int Application::start(int argc, char* argv[]) {
-    // 1. Парсинг аргументов командной строки
     ArgsParser parser;
     const ArgsParser::Result parse_result = parser.parse(argc, argv);
 
@@ -39,11 +36,8 @@ int Application::start(int argc, char* argv[]) {
         return 1;
     }
 
-    // 2. Построение пайплайна из распарсенных дескрипторов
     Pipeline pipeline = converter_.create_pipeline(parser.get_filters());
 
-    // 3. Загрузка входного сигнала (опционально).
-    // Если первым идёт генератор, входной файл игнорируется согласно ТЗ.
     Waveform waveform;
     const std::string& in_file = parser.get_input_file();
     const bool first_filter_is_generator =
@@ -53,10 +47,8 @@ int Application::start(int argc, char* argv[]) {
         waveform = WavReader::read(in_file);
     }
 
-    // 4. Применение пайплайна
     pipeline.apply(waveform);
 
-    // 5. Запись результата (опционально)
     const std::string& out_file = parser.get_output_file();
     if (!out_file.empty()) {
         std::cout << "Writing: " << out_file << "\n";
