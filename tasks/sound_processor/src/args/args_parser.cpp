@@ -1,10 +1,6 @@
 #include "args/args_parser.h"
 #include <cctype>
 
-// Токен является флагом (например, -i, -o, -f, -h), если:
-//   - начинается с '-'
-//   - второй символ — буква (не цифра и не точка)
-// Токены вида "-0.5", "-1", "-.5" — это отрицательные числа, не флаги.
 static bool is_flag(const char* token) {
     if (token[0] != '-') return false;
     if (token[1] == '\0') return false;          // одинокий '-'
@@ -54,9 +50,6 @@ ArgsParser::Result ArgsParser::parse(int argc, char* argv[]) {
                 return Result::BadArgs;
             }
 
-            // Собираем параметры фильтра до тех пор, пока следующий токен
-            // не является флагом (-i, -o, -f, ...).
-            // Отрицательные числа (-0.5, -1) — не флаги, берём их как параметры.
             while (i + 1 < argc && !is_flag(argv[i + 1])) {
                 fd.params.push_back(argv[++i]);
             }
