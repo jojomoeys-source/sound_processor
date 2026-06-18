@@ -66,7 +66,7 @@ std::vector<int16_t> bandpass_signal(
     return result;
 }
 
-} // namespace
+} 
 
 RejectFilter::RejectFilter(int low_window_size, int high_window_size)
     : low_window_size_(low_window_size)

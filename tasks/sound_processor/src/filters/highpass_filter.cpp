@@ -40,7 +40,7 @@ double moving_average(
     return sum / static_cast<double>(window_size);
 }
 
-} // namespace
+} 
 
 HighpassFilter::HighpassFilter(int window_size) : window_size_(window_size) {
     validate_odd_window(window_size_, "highpass");
