@@ -9,11 +9,9 @@ public:
  
     ~Pipeline();
  
-    // Копирование запрещено: Pipeline владеет фильтрами через raw ptr
     Pipeline(const Pipeline&) = delete;
     Pipeline& operator=(const Pipeline&) = delete;
  
-    // Перемещение разрешено
     Pipeline(Pipeline&& other) noexcept;
     Pipeline& operator=(Pipeline&& other) noexcept;
  
