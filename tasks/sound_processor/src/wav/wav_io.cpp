@@ -60,9 +60,7 @@ void skip_bytes(std::istream& file,
     }
 }
 
-} // namespace
-
-// ─── WavReader ────────────────────────────────────────────────────────────────
+} 
 
 Waveform WavReader::read(const std::string& file_path) {
     const std::filesystem::path path(file_path);
@@ -76,7 +74,6 @@ Waveform WavReader::read(const std::string& file_path) {
         throw std::runtime_error("Cannot open file for reading: " + file_path);
     }
 
-    // 1. RIFF chunk (12 байт)
     RiffHeader riff{};
     file.read(reinterpret_cast<char*>(&riff), sizeof(riff));
     if (!file) {
@@ -92,7 +89,6 @@ Waveform WavReader::read(const std::string& file_path) {
         throw std::runtime_error("Invalid RIFF chunk size: " + file_path);
     }
 
-    // 2. fmt chunk
     FmtHeader fmt{};
     require_bytes_available(file, total_size, sizeof(fmt), path);
     file.read(reinterpret_cast<char*>(&fmt), sizeof(fmt));
@@ -132,7 +128,6 @@ Waveform WavReader::read(const std::string& file_path) {
         skip_bytes(file, fmt.subchunk_size - kExpectedBitsPerSample, total_size, path);
     }
 
-    // 3. Ищем data chunk, пропуская любые посторонние чанки (LIST, INFO и т.п.)
     DataHeader data{};
     while (true) {
         require_bytes_available(file, total_size, sizeof(data), path);
@@ -156,7 +151,6 @@ Waveform WavReader::read(const std::string& file_path) {
         throw std::runtime_error("Data chunk size exceeds file size: " + file_path);
     }
 
-    // 4. Читаем выборки
     const size_t bytes_per_sample = fmt.bits_per_sample / 8;
     if (data.subchunk_size % bytes_per_sample != 0) {
         throw std::runtime_error("Data chunk size is not aligned to sample size: " + file_path);
@@ -176,8 +170,6 @@ Waveform WavReader::read(const std::string& file_path) {
 
     return waveform;
 }
-
-// ─── WavWriter ────────────────────────────────────────────────────────────────
 
 void WavWriter::write(const std::string& file_path, const Waveform& waveform) {
     std::ofstream file(file_path, std::ios::binary);
@@ -210,14 +202,12 @@ void WavWriter::write(const std::string& file_path, const Waveform& waveform) {
         throw std::invalid_argument("WavWriter: WAV file is too large");
     }
 
-    // 1. RIFF chunk
     RiffHeader riff{};
     std::memcpy(riff.chunk_id, "RIFF", 4);
     riff.chunk_size = static_cast<uint32_t>(riff_size);
     std::memcpy(riff.format, "WAVE", 4);
     file.write(reinterpret_cast<const char*>(&riff), sizeof(riff));
 
-    // 2. fmt chunk
     FmtHeader fmt{};
     std::memcpy(fmt.subchunk_id, "fmt ", 4);
     fmt.subchunk_size  = 16;
@@ -229,13 +219,11 @@ void WavWriter::write(const std::string& file_path, const Waveform& waveform) {
     fmt.bits_per_sample = bits_per_sample;
     file.write(reinterpret_cast<const char*>(&fmt), sizeof(fmt));
 
-    // 3. data chunk
     DataHeader data{};
     std::memcpy(data.subchunk_id, "data", 4);
     data.subchunk_size = static_cast<uint32_t>(data_size);
     file.write(reinterpret_cast<const char*>(&data), sizeof(data));
 
-    // 4. Выборки
     if (data_size > 0) {
         file.write(reinterpret_cast<const char*>(waveform.get_samples().data()),
                    static_cast<std::streamsize>(data_size));
