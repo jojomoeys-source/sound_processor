@@ -24,8 +24,6 @@ Pipeline CmdLineArgs2PipelineConverter::create_pipeline(
     Pipeline pipeline;
 
     for (const auto& fd : descriptors) {
-        // Поиск продюсера, проверка null, создание фильтра — всё изолировано здесь
-        // (требование ТЗ: no cross-cutting concern)
         FilterProducer producer = find_producer(fd.name);
 
         if (!producer) {
